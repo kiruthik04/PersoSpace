@@ -29,6 +29,9 @@ app.use('/api/academic', academicRoutes);
 app.use('/api/finance', financeRoutes);
 app.use('/api/wellbeing', wellbeingRoutes);
 
+import { startKeepAlive } from './keepAlive';
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  startKeepAlive();
 });
