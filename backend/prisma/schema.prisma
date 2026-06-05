@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workouts     Workout[]
+  dietLogs     DietLog[]
+  sleepLogs    SleepLog[]
+  maintenance  MaintenanceTask[]
+  appUsages    AppUsageLog[]
+  studyBlocks  StudyBlock[]
+  projects     Project[]
+  transactions Transaction[]
+  budgets      Budget[]
+  subscriptions Subscription[]
+}
+
+// -----------------------------------------
+// Health & Physique
+// -----------------------------------------
+model Workout {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  date      DateTime @default(now())
+  type      String   // e.g., 'Pull', 'Push', 'Legs'
+  duration  Int      // in minutes
+  notes     String?
+  exercises Exercise[]
+}
+
+model Exercise {
+  id        String   @id @default(uuid())
+  workoutId String
+  workout   Workout  @relation(fields: [workoutId], references: [id])
+  name      String   // e.g., 'Barbell Row', 'Tricep Extension'
+  sets      Int
+  reps      Int
+  weight    Float    // kg or lbs
+}
+
+model DietLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  date      DateTime @default(now())
+  calories  Int
+  protein   Float
+  carbs     Float
+  fats      Float
+}
+
+model SleepLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  date      DateTime @default(now())
+  hours     Float
+  quality   Int      // 1-5 scale
+}
+
+model MaintenanceTask {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  task      String   // e.g., 'Hair Oiling', 'Wash Routine'
+  dueDate   DateTime
+  completed Boolean  @default(false)
+}
+
+// -----------------------------------------
+// Digital Wellbeing
+// -----------------------------------------
+model AppUsageLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  date      DateTime @default(now())
+  appName   String
+  duration  Int      // duration in minutes
+  isFlagged Boolean  @default(false) // Flagged for excessive use
+}
+
+// -----------------------------------------
+// Academic & Project Pipeline
+// -----------------------------------------
+model StudyBlock {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  subject   String
+  startTime DateTime
+  endTime   DateTime?
+  duration  Int?     // computed in minutes
+  syllabus  String?  // reference to syllabus part
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  name        String   // e.g., 'AI Agents', 'Latency Optimization'
+  description String?
+  status      String   // e.g., 'Planning', 'Active', 'Completed'
+  tasks       Task[]
+}
+
+model Task {
+  id        String   @id @default(uuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id])
+  title     String
+  status    String   // e.g., 'To Do', 'In Progress', 'Done' (Kanban)
+  dueDate   DateTime?
+}
+
+// -----------------------------------------
+// Financial Manager
+// -----------------------------------------
+model Transaction {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  amount      Float
+  type        String   // 'INCOME' or 'EXPENSE'
+  category    String   // e.g., 'Groceries', 'Salary'
+  date        DateTime @default(now())
+  description String?
+}
+
+model Budget {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  category  String
+  limit     Float
+  month     Int
+  year      Int
+}
+
+model Subscription {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  name      String
+  cost      Float
+  cycle     String   // 'MONTHLY', 'YEARLY'
+  nextDate  DateTime
+}
